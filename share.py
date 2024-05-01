@@ -43,7 +43,10 @@ def list_paths(startpath):
                 current_dict = current_dict[part]
             folders_list.append(rel_path.replace('\\', '/'))
         for file in files:
-            current_dict[file] = os.path.join(root, file)
+            path = os.path.join(root, file)
+            if path.endswith('uploads\\uploaded files show up here'):
+                continue
+            current_dict[file] = path
     return files_dict, folders_list
 
 
