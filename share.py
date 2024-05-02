@@ -16,7 +16,7 @@ app.config.update(
     UPLOADED_PATH=os.getcwd() + '/uploads',
     DROPZONE_ALLOWED_FILE_TYPE='default',
     DROPZONE_MAX_FILE_SIZE=1000, # MB
-    DROPZONE_MAX_FILES=100, # Max number of files
+    DROPZONE_MAX_FILES=50000, # Max number of files
 )
 
 

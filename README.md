@@ -4,7 +4,7 @@ Swift Share is an easy-to-use local file sharing application that simplifies and
 
 ## Key Features
 * 100% private and secure.
-* Drag and drop any number of files into a folder or nested folder at any level of the directory tree with a single click.
+* Drag and drop codebases (projects) into a target folder or nested folder at any level of the directory tree with a single click.
 * Download or delete files with a single click.
 * Download or delete folders and nested folders with a single click.
 * Create folders and nested folders by simply typing a name and pressing Enter.
