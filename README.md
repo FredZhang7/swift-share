@@ -14,8 +14,8 @@ Cons:
 * No tracking history for multiple people working on the same files.
 
 
-## Preview
-![](./data/example.png)
+## Example
+<img src="./data/example.png" alt="Example" width="690">
 
 ## Demo
 ![](./data/walkthrough.gif)
