@@ -17,7 +17,7 @@ Swift Share is an easy-to-use local file sharing application that simplifies and
 ![](./data/walkthrough.gif)
 
 ## Setup
-On Windows, go to Control Panel > System and Security > Windows Defender Firewall > Allow an app or feature through Windows Defender Firewall. Click on Change settings. Tick the Python checkbox. If your network is public, tick the Public checkbox. If it's private, tick the Private checkbox. Apply the changes by clicking OK.
+On Windows, go to Control Panel > System and Security > Windows Defender Firewall > Allow an app or feature through Windows Defender Firewall. Click on Change settings. Tick the "Python" checkbox. If your network is public, tick the Public checkbox next to "Python"; if it's private, tick the Private checkbox. Apply the changes by clicking OK.
 
 Run `pip install -r requirements.txt` in a terminal. Then run `python share.py` to start the server. Now you can access Swift Share from any device on your local network using the second URL printed to the console.
 
