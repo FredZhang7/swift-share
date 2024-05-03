@@ -3,7 +3,7 @@
 Swift Share is an easy-to-use local file sharing application that simplifies and speeds up project sharing for people working on multiple projects and devices by up to 100% over GitHub.
 
 ## Key Features
-* 100% private and secure.
+* 100% private.
 * Drag and drop codebases (projects) into a target folder or nested folder at any level of the directory tree with a single click.
 * Download or delete files with a single click.
 * Download or delete folders and nested folders with a single click.
