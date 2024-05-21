@@ -21,10 +21,10 @@ Swift Share is a fully secure, easy-to-use file sharing application that is up t
 * Perform word wrapping to prevent horizontal scrolling.
 * Create new Notepad tabs with a single click.
 
-## Example
+## Swift Drive Example
 <img src="./data/example.png" alt="Example" width="690">
 
-## Demo
+## Swift Drive Demo
 ![](./data/walkthrough.gif)
 
 ## Setup
