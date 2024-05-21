@@ -8,7 +8,6 @@ import shutil
 import re
 
 
-
 app = Flask(__name__)
 dropzone = Dropzone(app)
 bootstrap = Bootstrap4(app)
@@ -45,11 +44,17 @@ def handle_notepad_action(json):
         'notepads': notepads
     }, namespace='/notepad', broadcast=True)
 
-# SocketIO events
+
 @socketio.on('connect', namespace='/notepad')
 def connect():
     # Send the current state of the notepad to the newly connected client
     emit('notepad_init', {'action': 'sync', 'notepads': notepads}, namespace='/notepad')
+
+@socketio.on('file_uploaded', namespace='/files')
+def handle_file_upload(json):
+    # Emit the updated file list to all clients
+    paths, folders = list_paths(app.config['UPLOADED_PATH'])
+    emit('files_update', {'files': paths, 'folders': folders}, namespace='/files', broadcast=True)
 
 
 def remove_path(path):
@@ -87,17 +92,17 @@ def upload():
     if request.method == 'POST':
         files = request.files.getlist('file')
         folder = request.form.get('folder')
-        if folder == None:
+        if folder is None:
             folder = './'
         else:
             folder = os.path.join(app.config['UPLOADED_PATH'], folder)
         os.makedirs(folder, exist_ok=True)
         for f in files:
             f.save(os.path.join(folder, f.filename))
+        # Emit the file upload event
+        handle_file_upload({})
     paths, folders = list_paths(app.config['UPLOADED_PATH'])
     return render_template('upload.html', files=paths, folders=folders)
-
-
 
 
 @app.route('/create_folder', methods=['POST'])
@@ -109,10 +114,24 @@ def create_folder():
     return redirect(url_for('upload'))
 
 
+@socketio.on('file_deleted', namespace='/files')
+def handle_file_delete(json):
+    # Emit the updated file list to all clients
+    paths, folders = list_paths(app.config['UPLOADED_PATH'])
+    emit('files_update', {'files': paths, 'folders': folders}, namespace='/files', broadcast=True)
+
+@app.route('/delete/<path:filename>', methods=['GET'])
+def delete(filename):
+    remove_path(get_upload_path(filename))
+    handle_file_delete({})
+    return redirect(url_for('upload'))
+
 @app.route('/delete_folder/<path:folder_name>', methods=['GET'])
 def delete_folder(folder_name):
     shutil.rmtree(os.path.join(app.config['UPLOADED_PATH'], folder_name))
+    handle_file_delete({})
     return redirect(url_for('upload'))
+
 
 @app.route('/files/<path:filename>', methods=['GET'])
 def download(filename):
@@ -123,10 +142,6 @@ def download(filename):
     else:
         return send_from_directory(app.config['UPLOADED_PATH'], filename, as_attachment=True)
 
-@app.route('/delete/<path:filename>', methods=['GET'])
-def delete(filename):
-    remove_path(get_upload_path(filename))
-    return redirect(url_for('upload'))
 
 
 @app.route('/download_all', methods=['GET'])
@@ -139,7 +154,6 @@ def delete_all():
     for filename in os.listdir(app.config['UPLOADED_PATH']):
         remove_path(get_upload_path(filename))
     return redirect(url_for('upload'))
-
 
 
 

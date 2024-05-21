@@ -28,6 +28,7 @@
         }
 
         .notepad-container {
+            margin-top: 5vw;
             display: flex;
             justify-content: center;
             flex-direction: column;
@@ -77,8 +78,11 @@
         </ul>
         {% endmacro %}
 
-
-        {{ render_dict(files) }}
+        <!-- File List Section -->
+        <div id="fileList">
+            <!-- The file list will be rendered here by the JavaScript function -->
+            {{ render_dict(files) }}
+        </div>
 
         <!-- New Dropzone form for drag-and-drop file upload -->
         <div class="container py-5">
@@ -136,16 +140,58 @@
         content.innerHTML = '<textarea class="form-control notepad-textarea" rows="5"></textarea>'; // Add the class here
         document.getElementById('notepadContent').appendChild(content);
 
+        var filesSocket = io.connect('http://' + document.domain + ':' + location.port + '/files');
+
+        // Function to render the updated file list with tree structure
+        function renderFiles(files) {
+            // Clear the current file list
+            var fileListElement = document.querySelector('#fileList');
+            fileListElement.innerHTML = '';
+
+            // Recursive function to render files and folders
+            function renderDict(dict, path = '', prefix = '') {
+                var html = '<ul style="list-style: none; padding-left: 0;">';
+                for (var key in dict) {
+                    if (typeof dict[key] === 'object') { // It's a folder
+                        html += '<li style="margin-bottom: 16px; margin-top: 16px;">' +
+                            '<pre style="display: inline; border: none; padding: 0;">' + prefix + '├── </pre>' +
+                            '<span style="border: 1px solid #ccc; padding: 2px;">' +
+                            '<a href="#" data-toggle="modal" data-target="#actionModal" data-filename="' + path + key + '" data-folder="true">' + key + '</a>' +
+                            '</span>';
+                        html += renderDict(dict[key], path + key + '/', prefix + "│ ");
+                    } else { // It's a file
+                        html += '<li style="margin-bottom: 1px;">' +
+                            '<pre style="display: inline; border: none; padding: 0;">' + prefix + '├── </pre>' +
+                            '<span style="border: 1px dashed #ccc; padding: 2px;">' +
+                            '<a href="#" data-toggle="modal" data-target="#actionModal" data-filename="' + path + key + '" data-folder="false">' + key + '</a>' +
+                            '</span>';
+                    }
+                    html += '</li>';
+                }
+                html += '</ul>';
+                return html;
+            }
+
+            // Call the recursive renderDict function and set the innerHTML
+            fileListElement.innerHTML = renderDict(files);
+        }
+
+        // SocketIO event listener for file updates
+        filesSocket.on('files_update', function (data) {
+            renderFiles(data.files);
+        });
+
+        // Dropzone configuration
         Dropzone.options.myDropzone = {
             init: function () {
-                this.on("queuecomplete", function () {
-                    location.reload();  // Refresh the page after all files are uploaded
-                });
                 this.on("sending", function (file, xhr, formData) {
                     // Get the selected folder from the dropdown
                     var folder = document.querySelector('#folderSelect').value;
                     // Set the value of the hidden input field
                     document.querySelector('#folder').value = folder;
+                });
+                this.on("complete", function (file) {
+                    this.removeFile(file); // Remove the file from the dropzone area once uploaded
                 });
             }
         };
