@@ -111,6 +111,7 @@ def create_folder():
     if not re.match(r'^[\w-]+(\/[\w-]+)*$', folder_name):
         return "Invalid folder name. Please use only letters, numbers, underscores, and hyphens. Use '/' for nested folders.", 400
     os.makedirs(os.path.join(app.config['UPLOADED_PATH'], folder_name), exist_ok=True)
+    handle_file_upload({})
     return redirect(url_for('upload'))
 
 
@@ -153,6 +154,7 @@ def download_all():
 def delete_all():
     for filename in os.listdir(app.config['UPLOADED_PATH']):
         remove_path(get_upload_path(filename))
+    handle_file_delete({})
     return redirect(url_for('upload'))
 
 
