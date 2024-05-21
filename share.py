@@ -1,5 +1,5 @@
-from flask import Flask, request, render_template, send_from_directory, send_file, redirect, url_for, jsonify
-from flask_socketio import SocketIO
+from flask import Flask, request, render_template, send_from_directory, send_file, redirect, url_for
+from flask_socketio import SocketIO, emit
 from flask_dropzone import Dropzone
 from flask_bootstrap import Bootstrap4
 import collections
@@ -12,7 +12,8 @@ import re
 app = Flask(__name__)
 dropzone = Dropzone(app)
 bootstrap = Bootstrap4(app)
-socketio = SocketIO(app)
+
+socketio = SocketIO(app, debug=True, engineio_logger=True)
 
 app.config.update(
     UPLOADED_PATH=os.getcwd() + '/uploads',
@@ -20,6 +21,35 @@ app.config.update(
     DROPZONE_MAX_FILE_SIZE=1000, # MB
     DROPZONE_MAX_FILES=50000, # Max number of files
 )
+
+notepads = {}
+
+@socketio.on('notepad_action', namespace='/notepad')
+def handle_notepad_action(json):
+    action = json['action']
+    tab_id = json['tab_id']
+    content = json.get('content', '')
+
+    if action == 'create':
+        notepads[tab_id] = content
+    elif action == 'update':
+        notepads[tab_id] = content
+    elif action == 'delete' and tab_id in notepads:
+        del notepads[tab_id]
+
+    # Emit to all clients, including the sender
+    emit('notepad_update', {
+        'action': action,
+        'tab_id': tab_id,
+        'content': content,
+        'notepads': notepads
+    }, namespace='/notepad', broadcast=True)
+
+# SocketIO events
+@socketio.on('connect', namespace='/notepad')
+def connect():
+    # Send the current state of the notepad to the newly connected client
+    emit('notepad_init', {'action': 'sync', 'notepads': notepads}, namespace='/notepad')
 
 
 def remove_path(path):
@@ -114,4 +144,4 @@ def delete_all():
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=False, host='0.0.0.0', port=8080)
+    socketio.run(app, debug=True, host='0.0.0.0', port=8080)

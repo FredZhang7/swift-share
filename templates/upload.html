@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,12 +13,34 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
     <style>
         a {
             color: black;
         }
+
+        #notepadTabs {
+            justify-content: center;
+        }
+
+        #notepadContent {
+            text-align: center;
+        }
+
+        .notepad-container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .notepad-textarea {
+            width: 80vw;
+            min-height: 30vw;
+        }
     </style>
 </head>
+
 <body>
     <div class="container py-5">
         <h1 class="mb-5">Upload your file</h1>
@@ -32,32 +55,35 @@
         {% macro render_dict(dict, path='', prefix='') %}
         <ul style="list-style: none; padding-left: 0;">
             {% for key, value in dict.items() %}
-                {% if value is mapping %}
-                    <li style="margin-bottom: 16px; margin-top: 16px;">
-                        <pre style="display: inline; border: none; padding: 0;">{{ prefix }}├── </pre>
-                        <span style="border: 1px solid #ccc; padding: 2px;">
-                            <a href="#" data-toggle="modal" data-target="#actionModal" data-filename="{{ path + key }}" data-folder="true" style="color: black;">{{ key }}</a>
-                        </span>
-                        {{ render_dict(value, path + key + '/', prefix + "│   ") }}
-                    </li>
-                {% else %}
-                    <li style="margin-bottom: 1px;">
-                        <pre style="display: inline; border: none; padding: 0;">{{ prefix }}├── </pre>
-                        <span style="border: 1px dashed #ccc; padding: 2px;">
-                            <a href="#" data-toggle="modal" data-target="#actionModal" data-filename="{{ path + key }}" data-folder="false" style="color: black;">{{ key }}</a>
-                        </span>
-                    </li>
-                {% endif %}
+            {% if value is mapping %}
+            <li style="margin-bottom: 16px; margin-top: 16px;">
+                <pre style="display: inline; border: none; padding: 0;">{{ prefix }}├── </pre>
+                <span style="border: 1px solid #ccc; padding: 2px;">
+                    <a href="#" data-toggle="modal" data-target="#actionModal" data-filename="{{ path + key }}"
+                        data-folder="true" style="color: black;">{{ key }}</a>
+                </span>
+                {{ render_dict(value, path + key + '/', prefix + "│ ") }}
+            </li>
+            {% else %}
+            <li style="margin-bottom: 1px;">
+                <pre style="display: inline; border: none; padding: 0;">{{ prefix }}├── </pre>
+                <span style="border: 1px dashed #ccc; padding: 2px;">
+                    <a href="#" data-toggle="modal" data-target="#actionModal" data-filename="{{ path + key }}"
+                        data-folder="false" style="color: black;">{{ key }}</a>
+                </span>
+            </li>
+            {% endif %}
             {% endfor %}
         </ul>
-        {% endmacro %}        
-        
-        
+        {% endmacro %}
+
+
         {{ render_dict(files) }}
-    
+
         <!-- New Dropzone form for drag-and-drop file upload -->
         <div class="container py-5">
-            <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+            <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="myDropzone"
+                enctype="multipart/form-data">
                 <div class="fallback">
                     <input name="file" type="file" multiple />
                     <input type="submit" value="Upload" />
@@ -71,34 +97,51 @@
             </form>
         </div>
     </div>
-    
-    <div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+
+    <div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="actionModalLabel">Choose an action</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalLabel">Choose an action</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>What do you want to do with this file?</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="downloadLink" class="btn btn-primary">Download</a>
+                    <a href="#" id="deleteLink" class="btn btn-danger">Delete</a>
+                </div>
             </div>
-            <div class="modal-body">
-            <p>What do you want to do with this file?</p>
-            </div>
-            <div class="modal-footer">
-            <a href="#" id="downloadLink" class="btn btn-primary">Download</a>
-            <a href="#" id="deleteLink" class="btn btn-danger">Delete</a>
-            </div>
-        </div>
         </div>
     </div>
-  
+
+    <!-- Notepad section -->
+    <div class="notepad-container py-5">
+        <h2 class="mb-3">Notepad</h2>
+        <div id="notepadTabs" class="nav nav-tabs" role="tablist"></div>
+        <div id="notepadContent" class="tab-content"></div>
+        <button id="addTab" class="btn btn-primary mt-3">Add Notepad</button>
+    </div>
+
     <script>
+        // Add the content area for the new tab
+        var content = document.createElement('div');
+        content.className = 'tab-pane';
+        content.id = 'content-' + tabId;
+        content.role = 'tabpanel';
+        content.innerHTML = '<textarea class="form-control notepad-textarea" rows="5"></textarea>'; // Add the class here
+        document.getElementById('notepadContent').appendChild(content);
+
         Dropzone.options.myDropzone = {
-            init: function() {
-                this.on("queuecomplete", function() {
+            init: function () {
+                this.on("queuecomplete", function () {
                     location.reload();  // Refresh the page after all files are uploaded
                 });
-                this.on("sending", function(file, xhr, formData) {
+                this.on("sending", function (file, xhr, formData) {
                     // Get the selected folder from the dropdown
                     var folder = document.querySelector('#folderSelect').value;
                     // Set the value of the hidden input field
@@ -125,7 +168,105 @@
             }
         });
 
+        var tabId;
+
+        function debounce(func, wait, immediate) {
+            var timeout;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                }, wait);
+                if (immediate && !timeout) func.apply(context, args);
+            };
+        }
+        var charLimit = 12; // Character limit for tab names
+
+        // SocketIO connection
+        var socket = io.connect('http://' + document.domain + ':' + location.port + '/notepad');
+
+        // Function to emit notepad updates
+        function emitUpdate(tabId, content) {
+            socket.emit('notepad_action', { action: 'update', tab_id: tabId, content: content });
+        }
+
+        // Function to add a new notepad tab and content container
+        function addNotepadTab(tabId, content = '') {
+            // Create the tab if it doesn't exist
+            var tab = document.getElementById('tab-' + tabId);
+            if (!tab) {
+                tab = document.createElement('a');
+                tab.className = 'nav-item nav-link';
+                tab.id = 'tab-' + tabId;
+                tab.href = '#content-' + tabId;
+                tab.role = 'tab';
+                tab.setAttribute('data-toggle', 'tab');
+                document.getElementById('notepadTabs').appendChild(tab);
+            }
+            // Update the tab name if the tab already exists
+            tab.textContent = content.substring(0, charLimit) || 'New Tab';
+
+            // Create the content container if it doesn't exist
+            var contentContainer = document.getElementById('content-' + tabId);
+            if (!contentContainer) {
+                contentContainer = document.createElement('div');
+                contentContainer.className = 'tab-pane fade';
+                contentContainer.id = 'content-' + tabId;
+                contentContainer.role = 'tabpanel';
+                var textarea = document.createElement('textarea');
+                textarea.className = 'form-control notepad-textarea';
+                textarea.rows = '5';
+                textarea.value = content;
+
+                // Add input event listener to the new textarea
+                textarea.addEventListener('input', debounce(function () {
+                    emitUpdate(tabId, this.value);
+                    // Update the tab name immediately on input
+                    tab.textContent = this.value.substring(0, charLimit) || 'New Tab';
+                }, 250));
+
+                contentContainer.appendChild(textarea);
+                document.getElementById('notepadContent').appendChild(contentContainer);
+            }
+        }
+
+        // Event listener for adding a new notepad tab
+        document.getElementById('addTab').addEventListener('click', function () {
+            var newTabId = 'tab-' + (new Date()).getTime();
+            socket.emit('notepad_action', { action: 'create', tab_id: newTabId, content: '' });
+        });
+
+        // SocketIO event listeners
+        socket.on('notepad_update', function (data) {
+            if (data.action === 'update') {
+                var contentContainer = document.getElementById('content-' + data.tab_id);
+                if (contentContainer) {
+                    var textarea = contentContainer.querySelector('textarea');
+                    if (textarea && textarea.value !== data.content) {
+                        textarea.value = data.content;
+                        // Update the tab name when the content changes
+                        var tab = document.getElementById('tab-' + data.tab_id);
+                        if (tab) {
+                            tab.textContent = data.content.substring(0, charLimit) || 'New Tab';
+                        }
+                    }
+                }
+            } else if (data.action === 'create') {
+                addNotepadTab(data.tab_id, data.content);
+            }
+        });
+
+        socket.on('notepad_init', function (data) {
+            if (data.action === 'sync') {
+                Object.keys(data.notepads).forEach(function (tabId) {
+                    addNotepadTab(tabId, data.notepads[tabId]);
+                });
+            }
+        });
     </script>
 
 </body>
+
 </html>
