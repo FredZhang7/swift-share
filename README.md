@@ -1,14 +1,25 @@
 # Swift Share
 
-Swift Share is an easy-to-use local file sharing application that simplifies and speeds up project sharing for people working on multiple projects and devices by up to 100% over GitHub.
+Swift Share is a fully secure, easy-to-use file sharing application that is up to 100% faster than GitHub, Google Drive, and Google Docs for people working on multiple projects and devices on the same network.
 
 ## Key Features
+
+### Security
 * 100% private and secure.
-* Drag and drop codebases (projects) into a target folder or nested folder at any level of the directory tree with a single click.
+
+### Swift Drive
+* All file system changes are synchronized across devices on the same network.
+* Drag and drop codebases (projects) to a target folder or nested folder at any level of the directory tree with a single click.
 * Download or delete files with a single click.
 * Download or delete folders and nested folders with a single click.
 * Create folders and nested folders by simply typing a name and pressing Enter.
 * Display a clear tree view of all files and folders in the codebase.
+
+### Swift Docs
+* All changes to the Notepad section, including adding new tabs and typing new content, are synchronized across devices on the same network.
+* Provides basic text editing, such as typing, deleting, cutting, copying, and pasting text.
+* Perform word wrapping to prevent horizontal scrolling.
+* Create new Notepad tabs with a single click.
 
 ## Example
 <img src="./data/example.png" alt="Example" width="690">
