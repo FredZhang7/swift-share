@@ -55,16 +55,6 @@
         
         {{ render_dict(files) }}
     
-        <!-- Existing form for manual file upload -->
-        <!-- <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
-            <select name="folder">
-                {% for folder in folders %}
-                <option value="{{ folder }}">{{ folder }}</option>
-                {% endfor %}
-            </select>
-            <input type="file" name="file">
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form> -->
         <!-- New Dropzone form for drag-and-drop file upload -->
         <div class="container py-5">
             <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="myDropzone" enctype="multipart/form-data">

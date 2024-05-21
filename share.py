@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template, send_from_directory, send_file, redirect, url_for
+from flask import Flask, request, render_template, send_from_directory, send_file, redirect, url_for, jsonify
+from flask_socketio import SocketIO
 from flask_dropzone import Dropzone
 from flask_bootstrap import Bootstrap4
 import collections
@@ -11,6 +12,7 @@ import re
 app = Flask(__name__)
 dropzone = Dropzone(app)
 bootstrap = Bootstrap4(app)
+socketio = SocketIO(app)
 
 app.config.update(
     UPLOADED_PATH=os.getcwd() + '/uploads',
@@ -112,4 +114,4 @@ def delete_all():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=8080)
+    socketio.run(app, debug=False, host='0.0.0.0', port=8080)
