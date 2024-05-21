@@ -12,7 +12,7 @@ app = Flask(__name__)
 dropzone = Dropzone(app)
 bootstrap = Bootstrap4(app)
 
-socketio = SocketIO(app, debug=True, engineio_logger=True)
+socketio = SocketIO(app) # , debug=True, engineio_logger=True
 
 app.config.update(
     UPLOADED_PATH=os.getcwd() + '/uploads',
