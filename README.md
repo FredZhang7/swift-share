@@ -1,6 +1,6 @@
 # Swift Share
 
-Swift Share is a fully secure, easy-to-use file sharing application that is up to 100% faster than GitHub, Google Drive, and Google Docs for people working on multiple projects and devices on the same network.
+Swift Share is a fully secure, easy-to-use project sharing application that enables project collaboration at speeds 100% faster than GitHub, Google Drive, and Google Docs for people working on multiple projects and devices on the same network.
 
 ## Key Features
 
