@@ -43,6 +43,9 @@ Run `pip install -r requirements.txt` in a terminal. Then run `python share.py` 
     - Create a responsive web UI with pre-defined Bootstrap CSS classes.
 * jQuery
     - Select and manipulate HTML elements during events.
+* Flask-SocketIO
+    - Enables real-time, bi-directional communication between clients and servers.
+    - Manages notepad actions and file uploads on all devices on the same network simultaneously.
 
 ## Limitations
 * No tracking history for multiple people working on the same files.
