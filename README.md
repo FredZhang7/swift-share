@@ -15,6 +15,8 @@ Swift Share is a fully secure, easy-to-use project sharing application that enab
 * Create folders and nested folders by simply typing a name and pressing Enter.
 * Display a clear tree view of all files and folders in the codebase.
 
+- [ ] Release VSCode-style editor
+
 ### Swift Docs
 * All changes to the Notepad section, including adding new tabs and typing new content, are synchronized across devices on the same network.
 * Provides basic text editing, such as typing, deleting, cutting, copying, and pasting text.
